@@ -1,6 +1,7 @@
 module.exports = login
 var url = require("url")
   , request = require("request")
+  , userValidate = require("npm-user-validate")
 
 function login (req, res) {
   switch (req.method) {
@@ -35,6 +36,11 @@ function handleForm (req, res) {
   req.on('form', function (data) {
     if (!data.name || !data.password) {
       return res.template('login.ejs', {error: 'Name or password not provided'})
+    }
+
+    var error = userValidate.pw(data.password)
+    if (error) {
+      return res.template('login.ejs', {error: error.message})
     }
 
     req.couch.login(data, function (er, cr, couchSession) {
